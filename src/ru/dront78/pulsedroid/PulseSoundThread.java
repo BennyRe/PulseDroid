@@ -70,26 +70,28 @@ public class PulseSoundThread implements Runnable {
 		final int sampleRate = 48000;
 
 		int musicLength = AudioTrack.getMinBufferSize(sampleRate,
-				AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+				AudioFormat.CHANNEL_OUT_STEREO,
 				AudioFormat.ENCODING_PCM_16BIT);
 		AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-				sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+				sampleRate, AudioFormat.CHANNEL_OUT_STEREO,
 				AudioFormat.ENCODING_PCM_16BIT, musicLength,
 				AudioTrack.MODE_STREAM);
 		audioTrack.play();
 
 		// TODO buffer size computation
-		byte[] audioBuffer = new byte[musicLength * 8];
+		byte[] audioBuffer = new byte[musicLength / 2];
 
 		while (false == mTerminate) {
 			try {
-				int sizeRead = audioData.read(audioBuffer, 0, musicLength * 8);
-				int sizeWrite = audioTrack.write(audioBuffer, 0, sizeRead);
-				if (sizeWrite == AudioTrack.ERROR_INVALID_OPERATION) {
-					sizeWrite = 0;
-				}
-				if (sizeWrite == AudioTrack.ERROR_BAD_VALUE) {
-					sizeWrite = 0;
+				int sizeRead = audioData.read(audioBuffer, 0, musicLength / 2);
+				if (audioBuffer[10] != 0 && audioBuffer[100] != 0 && audioBuffer[1000] != 0) {
+					int sizeWrite = audioTrack.write(audioBuffer, 0, sizeRead);
+					if (sizeWrite == AudioTrack.ERROR_INVALID_OPERATION) {
+						sizeWrite = 0;
+					}
+					if (sizeWrite == AudioTrack.ERROR_BAD_VALUE) {
+						sizeWrite = 0;
+					}
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
